@@ -31,7 +31,7 @@ def returner(ret):
     jid = ret['jid']
     master = __grains__['master']
 
-    for fai in data['Failure']:
+    for fai in data.get('Failure', []):
         check_id = fai.keys()[0]
         payload = {}
         event = {}
@@ -46,7 +46,7 @@ def returner(ret):
         payload.update({'event': event})
         hec.batchEvent(payload)
 
-    for suc in data['Success']:
+    for suc in data.get('Success', []):
         check_id = suc.keys()[0]
         payload = {}
         event = {}
@@ -61,10 +61,19 @@ def returner(ret):
         payload.update({"event": event})
         hec.batchEvent(payload)
 
-    payload = {}
-    payload.update({"minion_id": minion_id})
-    payload.update({"compliance_percentage": ret['return']['Compliance']})
-    hec.batchEvent(payload)
+    if data.get('Compliance', None):
+        payload = {}
+        event = {}
+        event.update({"minion_id": minion_id})
+        event.update({"job_id": jid})
+        event.update({"master": master})
+        event.update({"compliance_percentage": data['Compliance']})
+        payload.update({"host": minion_id})
+        payload.update({"sourcetype": opts['sourcetype']})
+        payload.update({"index": opts['index']})
+        payload.update({"event": event})
+        hec.batchEvent(payload)
+
     hec.flushBatch()
     return
 
