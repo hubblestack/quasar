@@ -1,3 +1,21 @@
+'''
+
+Send json response data to Splunk via the HTTP Event Collector
+Requires the following config values to be specified in config or pillar:
+
+hubblestack:
+  nova:
+    returner:
+      splunk:
+        token: <splunk_http_forwarder_token>
+        indexer: <hostname/IP of Splunk indexer>
+        sourcetype: <Destination sourcetype for data>
+        index: <Destination index for data>
+
+Run a test by using salt-call test.ping --return splunk
+
+'''
+
 import socket
 
 # Imports for http event forwarder
@@ -80,10 +98,10 @@ def returner(ret):
 
 def _get_options():
     try:
-        token = __salt__['config.get']('splunk_http_forwarder:token')
-        indexer = __salt__['config.get']('splunk_http_forwarder:indexer')
-        sourcetype = __salt__['config.get']('splunk_http_forwarder:sourcetype')
-        index = __salt__['config.get']('splunk_http_forwarder:index')
+        token = __salt__['config.get']('hubblestack:nova:returner:splunk:token')
+        indexer = __salt__['config.get']('hubblestack:nova:returner:splunk:indexer')
+        sourcetype = __salt__['config.get']('hubblestack:nova:returner:splunk:sourcetype')
+        index = __salt__['config.get']('hubblestack:nova:returner:splunk:index')
     except:
         return None
     splunk_opts = {"token": token, "indexer": indexer, "sourcetype": sourcetype, "index": index}
