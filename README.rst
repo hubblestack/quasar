@@ -15,6 +15,8 @@ Installation
 Supported Modules
 -----------------
 
+We support all returners provided by salt, including:
+
 * Splunk
 * syslog
 * Kafka
@@ -42,6 +44,8 @@ Supported Modules
 * SMTP
 * SQLite3
 * xmpp
+
+This repo is for hubble-specialized returners.
 
 Planned Modules
 ---------------
