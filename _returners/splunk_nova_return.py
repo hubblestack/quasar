@@ -58,6 +58,10 @@ def returner(ret):
         event.update({"check_id": check_id})
         event.update({"job_id": jid})
         event.update({"master": master})
+        if isinstance(fai[check_id], str):
+            event.update({"check_desc": fai[check_id]})
+        elif 'description' in fai[check_id]:
+            event.update({"check_desc": fai[check_id]['description']})
         payload.update({"host": minion_id})
         payload.update({"index": opts['index']})
         payload.update({"sourcetype": opts['sourcetype']})
@@ -73,6 +77,10 @@ def returner(ret):
         event.update({"check_id": check_id})
         event.update({"job_id": jid})
         event.update({"master": master})
+        if isinstance(suc[check_id], str):
+            event.update({"check_desc": suc[check_id]})
+        elif 'description' in suc[check_id]:
+            event.update({"check_desc": suc[check_id]['description']})
         payload.update({"host": minion_id})
         payload.update({"sourcetype": opts['sourcetype']})
         payload.update({"index": opts['index']})
