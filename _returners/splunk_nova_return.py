@@ -58,7 +58,7 @@ def returner(ret):
         event.update({"check_id": check_id})
         event.update({"job_id": jid})
         event.update({"master": master})
-        if isinstance(fai[check_id], str):
+        if not isinstance(fai[check_id], dict):
             event.update({"check_desc": fai[check_id]})
         elif 'description' in fai[check_id]:
             event.update({"check_desc": fai[check_id]['description']})
@@ -77,7 +77,7 @@ def returner(ret):
         event.update({"check_id": check_id})
         event.update({"job_id": jid})
         event.update({"master": master})
-        if isinstance(suc[check_id], str):
+        if not isinstance(suc[check_id], dict):
             event.update({"check_desc": suc[check_id]})
         elif 'description' in suc[check_id]:
             event.update({"check_desc": suc[check_id]['description']})
