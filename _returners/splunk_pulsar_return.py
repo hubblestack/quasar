@@ -107,7 +107,7 @@ def returner(ret):
                 event['file_hash_type'] = alert['checksum_type']
 
         event.update({"master": master})
-        event.update({"dest": fqdn})
+        event.update({"dest_host": fqdn})
         event.update({"dest_ip": fqdn_ip4})
         payload.update({"host": fqdn})
         payload.update({"index": opts['index']})
