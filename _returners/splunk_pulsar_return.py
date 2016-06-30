@@ -38,7 +38,6 @@ hec = None
 
 def returner(ret):
     # Customized to split up the change events and send to Splunk.
-
     opts = _get_options()
     logging.info("Options: %s" % json.dumps(opts))
     http_event_collector_key = opts['token']
@@ -54,6 +53,7 @@ def returner(ret):
     data = _dedupList(data)
     fqdn = __grains__['fqdn']
     master = __grains__['master']
+    fqdn_ip4 = __grains__['fqdn_ip4'][0]
 
     for item in data:
         alert = item['return']
@@ -99,12 +99,16 @@ def returner(ret):
             event['file_acl'] = stats['mode']
             event['file_create_time'] = stats['ctime']
             event['file_modify_time'] = stats['mtime']
+            event['file_size'] = stats['size'] / 1024.0  # Convert bytes to kilobytes
+            event['user'] = stats['user']
+            event['group'] = stats['group']
             if object_type == 'file':
                 event['file_hash'] = alert['checksum']
                 event['file_hash_type'] = alert['checksum_type']
 
         event.update({"master": master})
-        event.update({"minion_fqdn": fqdn})
+        event.update({"dest": fqdn})
+        event.update({"dest_ip": fqdn_ip4})
         payload.update({"host": fqdn})
         payload.update({"index": opts['index']})
         payload.update({"sourcetype": opts['sourcetype']})
@@ -133,31 +137,6 @@ def _get_options():
         return None
     splunk_opts = {"token": token, "indexer": indexer, "sourcetype": sourcetype, "index": index}
     return splunk_opts
-
-
-def send_splunk(event, index_override=None, sourcetype_override=None):
-    # Get Splunk Options
-    # init the payload
-    payload = {}
-
-    # Set up the event metadata
-    if index_override is None:
-        payload.update({"index": opts['index']})
-    else:
-        payload.update({"index": index_override})
-
-    if sourcetype_override is None:
-        payload.update({"sourcetype": opts['sourcetype']})
-    else:
-        payload.update({"sourcetype": sourcetype_override})
-
-    # Add the event
-    payload.update({"event": event})
-    logging.info("Payload: %s" % json.dumps(payload))
-
-    # fire it off
-    hec.batchEvent(payload)
-    return True
 
 
 # Thanks to George Starcher for the http_event_collector class (https://github.com/georgestarcher/)
@@ -227,7 +206,13 @@ class http_event_collector:
         if 'host' not in payload:
             payload.update({"host": self.host})
 
-        payloadLength = len(json.dumps(payload))
+        # If eventtime in epoch not passed as optional argument and not in payload, use current system time in epoch
+        if not eventtime and 'time' not in payload:
+            eventtime = time.time()
+            payload.update({"time": eventtime})
+
+        payloadString = json.dumps(payload)
+        payloadLength = len(payloadString)
 
         if (self.currentByteLength + payloadLength) > self.maxByteLength:
             self.flushBatch()
@@ -237,15 +222,8 @@ class http_event_collector:
         else:
             self.currentByteLength = self.currentByteLength + payloadLength
 
-        # If eventtime in epoch not passed as optional argument use current system time in epoch
-        if not eventtime:
-            eventtime = str(int(time.time()))
 
-        # Update time value on payload if need to use system time
-        data = {"time": eventtime}
-        data.update(payload)
-
-        self.batchEvents.append(json.dumps(data))
+        self.batchEvents.append(payloadString)
 
     def flushBatch(self):
         # Method to flush the batch list of events
