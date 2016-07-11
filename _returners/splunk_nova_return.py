@@ -1,13 +1,13 @@
 # -*- encoding: utf-8 -*-
 '''
-HubbleStack Pulsar-to-Splunk returner
+HubbleStack Nova-to-Splunk returner
 
 :maintainer: HubbleStack
 :maturity: 2016.7.0
 :platform: All
 :requires: SaltStack
 
-Deliver HubbleStack Pulsar event data into Splunk using the HTTP
+Deliver HubbleStack Nova result data into Splunk using the HTTP
 event collector. Required config/pillar settings:
 
 .. code-block:: yaml
