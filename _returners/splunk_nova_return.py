@@ -1,21 +1,26 @@
+# -*- encoding: utf-8 -*-
 '''
+HubbleStack Nova-to-Splunk returner
 
-Send json response data to Splunk via the HTTP Event Collector
-Requires the following config values to be specified in config or pillar:
+:maintainer: HubbleStack
+:maturity: 2016.7.0
+:platform: All
+:requires: SaltStack
 
-hubblestack:
-  nova:
-    returner:
-      splunk:
-        token: <splunk_http_forwarder_token>
-        indexer: <hostname/IP of Splunk indexer>
-        sourcetype: <Destination sourcetype for data>
-        index: <Destination index for data>
+Deliver HubbleStack Nova result data into Splunk using the HTTP
+event collector. Required config/pillar settings:
 
-Run a test by using salt-call test.ping --return splunk
+.. code-block:: yaml
 
+    hubblestack:
+      nova:
+        returner:
+          splunk:
+            token: <splunk_http_forwarder_token>
+            indexer: <hostname/IP of Splunk indexer>
+            sourcetype: <Destination sourcetype for data>
+            index: <Destination index for data>
 '''
-
 import socket
 
 # Imports for http event forwarder
