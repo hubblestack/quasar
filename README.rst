@@ -42,8 +42,8 @@ repo for updates and bugfixes!)
 
 .. code-block:: shell
 
-    wget https://spm.hubblestack.io/latest/hubblestack_quasar-latest.spm
-    spm local install hubblestack_quasar-latest.spm
+    wget https://spm.hubblestack.io/2016.7.0_RC1/hubblestack_quasar-2016.7.0_RC1-1.spm
+    spm local install hubblestack_quasar-2016.7.0_RC1-1.spm
 
 You should now be able to sync the new modules to your minion(s) using the
 `sync_returners` Salt utility:
