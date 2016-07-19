@@ -41,7 +41,6 @@ hec = None
 
 def returner(ret):
     # Customized to split up the queries and extract the correct sourcetype
-
     opts = _get_options()
     logging.info("Options: %s" % json.dumps(opts))
     http_event_collector_key = opts['token']
@@ -52,8 +51,12 @@ def returner(ret):
     data = ret['return']
     minion_id = ret['id']
     jid = ret['jid']
-    master = __grains__['master']
 
+    if __grains__['master']:
+        master=__grains__['master']
+    else:
+        master= socket.gethostname() # We *are* the master, so use our hostname
+  
     for fai in data.get('Failure', []):
         check_id = fai.keys()[0]
         payload = {}
@@ -107,6 +110,23 @@ def returner(ret):
 
     hec.flushBatch()
     return
+
+
+def event_return(event):
+    # When called from the master via event_return.
+    # 
+    # Note that presently the master won't see returners in file_roots/_returners 
+    # so you need to put it in a returners/ subdirectory and configure
+    # custom_modules in your master config.
+    for e in event:
+        if not("salt/job/" in e['tag']):
+            continue # not a salt job event. Not relevant to hubble
+        elif(e['data']['fun'] != "hubble.audit"):
+            continue # not a call to hubble.audit, so not relevant
+        else:
+            logging.debug("Logging event: %s" % str(e))
+            returner(e['data']) # Call the standard returner
+    return 
 
 
 def _get_options():
