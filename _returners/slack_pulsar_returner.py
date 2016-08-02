@@ -9,11 +9,11 @@ The following fields can be set in the minion conf file::
 
 .. code-block:: yaml
 
-    slack.channel (required)
-    slack.api_key (required)
-    slack.username (required)
-    slack.as_user (required to see the profile picture of your bot)
-    slack.profile (optional)
+    slack_pulsar.channel (required)
+    slack_pulsar.api_key (required)
+    slack_pulsar.username (required)
+    slack_pulsar.as_user (required to see the profile picture of your bot)
+    slack_pulsar.profile (optional)
 
 Alternative configuration values can be used by prefacing the configuration.
 Any values not found in the alternative configuration will be pulled from
@@ -21,10 +21,10 @@ the default location:
 
 .. code-block:: yaml
 
-    slack.channel
-    slack.api_key
-    slack.username
-    slack.as_user
+    slack_pulsar.channel
+    slack_pulsar.api_key
+    slack_pulsar.username
+    slack_pulsar.as_user
 
 Slack settings may also be configured as:
 
@@ -261,19 +261,19 @@ def returner(ret):
     api_key = _options.get('api_key')
 
     if not channel:
-        log.error('slack.channel not defined in salt config')
+        log.error('slack_pulsar.channel not defined in salt config')
         return
 
     if not username:
-        log.error('slack.username not defined in salt config')
+        log.error('slack_pulsar.username not defined in salt config')
         return
 
     if not as_user:
-        log.error('slack.as_user not defined in salt config')
+        log.error('slack_pulsar.as_user not defined in salt config')
         return
 
     if not api_key:
-        log.error('slack.api_key not defined in salt config')
+        log.error('slack_pulsar.api_key not defined in salt config')
         return
 
     message = ('id: {0}\r\n'
