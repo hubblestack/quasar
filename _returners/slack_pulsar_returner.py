@@ -277,7 +277,7 @@ def returner(ret):
         return
 
     message = ('id: {0}\r\n'
-               'return: {4}\r\n').format(__opts__['id'],
+               'return: {1}\r\n').format(__opts__['id'],
                                          pprint.pformat(ret.get('return')))
 
     slack = _post_message(channel,
