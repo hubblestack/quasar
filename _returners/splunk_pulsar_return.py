@@ -20,8 +20,6 @@ event collector. Required config/pillar settings:
             indexer: <hostname/IP of Splunk indexer>
             sourcetype: <Destination sourcetype for data>
             index: <Destination index for data>
-        return: splunk_pulsar
-        batch: True
 '''
 
 import socket
