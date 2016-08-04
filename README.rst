@@ -1,5 +1,5 @@
-HubbleStack Quasar
-==================
+Introduction
+============
 
 Quasar is Hubble's reporting system; a key component in visualizing your data.
 Quasar gathers the data captured by Nova, Nebula and Pulsar and delivers it
@@ -11,15 +11,11 @@ Note: dashboards not included :)
 Installation
 ============
 
-SPM Packages (Recommended)
-==========================
-
 Each of the four HubbleStack components have been packaged for use with Salt's
 Package Manager (SPM). Note that all SPM installation commands should be done
 on the *Salt Master*.
 
-Required Configuration
-----------------------
+**Required Configuration**
 
 Salt's Package Manager (SPM) installs files into `/srv/spm/{salt,pillar}`.
 Ensure that this path is defined in your Salt Master's `file_roots`:
@@ -33,8 +29,8 @@ Ensure that this path is defined in your Salt Master's `file_roots`:
 Note: Remember to restart the Salt Master after making this change to the
 configuration.
 
-Installation
-------------
+Installation (Packages)
+-----------------------
 
 Installation is as easy as downloading and installing a package. (Note: in
 future releases you'll be able to subscribe directly to our HubbleStack SPM
@@ -55,7 +51,7 @@ You should now be able to sync the new modules to your minion(s) using the
 Once these modules are synced you'll be ready to begin reporting data and events.
 
 Installation (Manual)
-=====================
+---------------------
 
 Copy everything from ``<hubblestack-quasar/_returners/>`` into your ``_returners/`` directory in your Salt
 fileserver (whether roots or gitfs) and sync it to the minion(s).
@@ -64,6 +60,7 @@ fileserver (whether roots or gitfs) and sync it to the minion(s).
 
     git clone https://github.com/hubblestack/quasar.git hubblestack-quasar.git
     cd hubblestack-quasar.git
+    mkdir -p /srv/salt/_returners
     cp _returners/*.py /srv/salt/_returners/
     salt \* saltutil.sync_returners
 
