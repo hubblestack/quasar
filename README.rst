@@ -26,8 +26,9 @@ Ensure that this path is defined in your Salt Master's `file_roots`:
       - /srv/salt
       - /srv/spm/salt
 
-Note: Remember to restart the Salt Master after making this change to the
-configuration.
+.. note:: This should be the default value. To verify run: `salt-call config.get file_roots`
+
+.. tip:: Remember to restart the Salt Master after making this change to the configuration.
 
 Installation (Packages)
 -----------------------
@@ -49,6 +50,8 @@ You should now be able to sync the new modules to your minion(s) using the
     salt \* saltutil.sync_returners
 
 Once these modules are synced you'll be ready to begin reporting data and events.
+
+Skip to [Usage].
 
 Installation (Manual)
 ---------------------
