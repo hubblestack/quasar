@@ -72,6 +72,15 @@ Usage
 
 Each Quasar module has different requirements and settings. Please see your preferred module's documentation.
 
+Configuration
+=============
+
+Under The Hood
+==============
+
+Development
+===========
+
 Contribute
 ==========
 
