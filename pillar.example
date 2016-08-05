@@ -1,0 +1,32 @@
+## populate the required fields for each returner needed
+
+#hubblestack:
+#  nova:
+#    returner:
+#      splunk:
+#        token: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+#        indexer: splunk-indexer.domain.tld
+#        sourcetype: hubble_nova
+#        index: hubble
+#
+#  nebula:
+#    returner:
+#      splunk:
+#        token: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+#        indexer: splunk-indexer.domain.tld
+#        sourcetype: hubble_nebula
+#        index: hubble
+#
+#  pulsar:
+#    returner:
+#      splunk:
+#        token: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+#        indexer: splunk-indexer.domain.tld
+#        sourcetype: hubble_pulsar
+#        index: hubble
+
+#slack_pulsar:
+#  as_user: true
+#  username: calculon
+#  channel: channel
+#  api_key: xoxb-xxxxxxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxx
