@@ -17,8 +17,8 @@ on the *Salt Master*.
 
 **Required Configuration**
 
-Salt's Package Manager (SPM) installs files into `/srv/spm/{salt,pillar}`.
-Ensure that this path is defined in your Salt Master's `file_roots`:
+Salt's Package Manager (SPM) installs files into ``/srv/spm/{salt,pillar}``.
+Ensure that this path is defined in your Salt Master's ``file_roots``:
 
 .. code-block:: yaml
 
@@ -26,7 +26,7 @@ Ensure that this path is defined in your Salt Master's `file_roots`:
       - /srv/salt
       - /srv/spm/salt
 
-.. note:: This should be the default value. To verify run: `salt-call config.get file_roots`
+.. note:: This should be the default value. To verify run: ``salt-call config.get file_roots``
 
 .. tip:: Remember to restart the Salt Master after making this change to the configuration.
 
@@ -43,7 +43,7 @@ repo for updates and bugfixes!)
     spm local install hubblestack_quasar-2016.7.0_RC1-1.spm
 
 You should now be able to sync the new modules to your minion(s) using the
-`sync_returners` Salt utility:
+``sync_returners`` Salt utility:
 
 .. code-block:: shell
 
@@ -56,8 +56,8 @@ Skip to [Usage].
 Installation (Manual)
 ---------------------
 
-Copy everything from ``<hubblestack-quasar/_returners/>`` into your ``_returners/`` directory in your Salt
-fileserver (whether roots or gitfs) and sync it to the minion(s).
+Copy everything from ``_returners/`` into your ``salt/_returners/`` directory,
+and sync it to the minions.
 
 .. code-block:: shell
 
