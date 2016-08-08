@@ -78,7 +78,22 @@ and sync it to the minions.
     cd hubblestack-quasar.git
     mkdir -p /srv/salt/_returners
     cp _returners/*.py /srv/salt/_returners/
+    cp pillar.example /srv/pillar/hubblestack_quasar.sls
     salt \* saltutil.sync_returners
+
+Target the ``hubblestack_quasar.sls`` extension and target it to selected minions.
+
+.. code-block:: shell
+
+    base:
+      '*':
+        - hubblestack_quasar
+
+.. code-block:: shell
+
+    salt \* saltutil.refresh_pillar
+
+Once these modules are synced you'll be ready to begin reporting data and events.
 
 Usage
 =====
