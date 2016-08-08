@@ -39,8 +39,8 @@ repo for updates and bugfixes!)
 
 .. code-block:: shell
 
-    wget https://spm.hubblestack.io/2016.7.0_RC1/hubblestack_quasar-2016.7.0_RC1-1.spm
-    spm local install hubblestack_quasar-2016.7.0_RC1-1.spm
+    wget https://spm.hubblestack.io/2016.7.0/hubblestack_quasar-2016.7.0-1.spm
+    spm local install hubblestack_quasar-2016.7.0-1.spm
 
 You should now be able to sync the new modules to your minion(s) using the
 ``sync_returners`` Salt utility:
@@ -48,6 +48,19 @@ You should now be able to sync the new modules to your minion(s) using the
 .. code-block:: shell
 
     salt \* saltutil.sync_returners
+
+Copy the ``hubblestack_quasar.sls.orig`` into your Salt pillar, dropping the
+``.orig`` extension and target it to selected minions.
+
+.. code-block:: shell
+
+    base:
+      '*':
+        - hubblestack_quasar
+
+.. code-block:: shell
+
+    salt \* saltutil.refresh_pillar
 
 Once these modules are synced you'll be ready to begin reporting data and events.
 
