@@ -1,3 +1,5 @@
+.. _quasar_introduction:
+
 Introduction
 ============
 
@@ -8,6 +10,8 @@ correlations all using the SIM/SEM system you already have!
 
 Note: dashboards not included :)
 
+.. _quasar_installation:
+
 Installation
 ============
 
@@ -15,7 +19,10 @@ Each of the four HubbleStack components have been packaged for use with Salt's
 Package Manager (SPM). Note that all SPM installation commands should be done
 on the *Salt Master*.
 
-**Required Configuration**
+.. _quasar_installation_required_configuration:
+
+Required Configuration
+----------------------
 
 Salt's Package Manager (SPM) installs files into ``/srv/spm/{salt,pillar}``.
 Ensure that this path is defined in your Salt Master's ``file_roots``:
@@ -29,6 +36,8 @@ Ensure that this path is defined in your Salt Master's ``file_roots``:
 .. note:: This should be the default value. To verify run: ``salt-call config.get file_roots``
 
 .. tip:: Remember to restart the Salt Master after making this change to the configuration.
+
+.. _quasar_installation_packages:
 
 Installation (Packages)
 -----------------------
@@ -64,7 +73,9 @@ Copy the ``hubblestack_quasar.sls.orig`` into your Salt pillar, dropping the
 
 Once these modules are synced you'll be ready to begin reporting data and events.
 
-Skip to [Usage].
+Skip to :ref:`Usage <quasar_usage>`.
+
+.. _quasar_installation_manual:
 
 Installation (Manual)
 ---------------------
@@ -95,19 +106,29 @@ Target the ``hubblestack_quasar.sls`` extension and target it to selected minion
 
 Once these modules are synced you'll be ready to begin reporting data and events.
 
+.. _quasar_usage:
+
 Usage
 =====
 
 Each Quasar module has different requirements and settings. Please see your preferred module's documentation.
 
+.. _quasar_configuration:
+
 Configuration
 =============
+
+.. _quasar_under_the_hood:
 
 Under The Hood
 ==============
 
+.. _quasar_development:
+
 Development
 ===========
+
+.. _quasar_contribute:
 
 Contribute
 ==========
