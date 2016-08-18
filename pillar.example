@@ -6,7 +6,7 @@
 #      splunk:
 #        token: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
 #        indexer: splunk-indexer.domain.tld
-#        sourcetype: hubble_nova
+#        sourcetype: hubble_audit
 #        index: hubble
 #
 #  nebula:
@@ -14,7 +14,7 @@
 #      splunk:
 #        token: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
 #        indexer: splunk-indexer.domain.tld
-#        sourcetype: hubble_nebula
+#        sourcetype: hubble_osquery
 #        index: hubble
 #
 #  pulsar:
@@ -22,7 +22,7 @@
 #      splunk:
 #        token: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
 #        indexer: splunk-indexer.domain.tld
-#        sourcetype: hubble_pulsar
+#        sourcetype: hubble_fim
 #        index: hubble
 
 #slack_pulsar:
