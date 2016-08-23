@@ -60,6 +60,7 @@ def returner(ret):
                 event = {}
                 payload = {}
                 event.update(query_result)
+                event.update({'query': query_name})
                 event.update({"master": master})
                 event.update({"minion_id": minion_id})
                 event.update({"job_id": jid})
