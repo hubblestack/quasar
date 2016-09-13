@@ -48,8 +48,9 @@ def returner(ret):
     logging.info("Options: %s" % json.dumps(opts))
     http_event_collector_key = opts['token']
     http_event_collector_host = opts['indexer']
+    hec_ssl = opts['http_event_server_ssl']
     # Set up the collector
-    hec = http_event_collector(http_event_collector_key, http_event_collector_host)
+    hec = http_event_collector(http_event_collector_key, http_event_collector_host, http_event_server_ssl=hec_ssl)
     # Check whether or not data is batched:
     if isinstance(ret, dict):  # Batching is disabled
         data = [ret]
@@ -142,6 +143,13 @@ def _get_options():
     except:
         return None
     splunk_opts = {"token": token, "indexer": indexer, "sourcetype": sourcetype, "index": index}
+
+    try:
+        hec_ssl = __salt__['config.get']('hubblestack:pulsar:returner:splunk:hec_ssl')
+    except:
+        hec_ssl = True
+    splunk_opts["http_event_server_ssl"]=hec_ssl
+
     return splunk_opts
 
 
