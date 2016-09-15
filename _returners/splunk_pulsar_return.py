@@ -144,10 +144,7 @@ def _get_options():
         return None
     splunk_opts = {"token": token, "indexer": indexer, "sourcetype": sourcetype, "index": index}
 
-    try:
-        hec_ssl = __salt__['config.get']('hubblestack:pulsar:returner:splunk:hec_ssl')
-    except:
-        hec_ssl = True
+    hec_ssl = __salt__['config.get']('hubblestack:pulsar:returner:splunk:hec_ssl', True)
     splunk_opts["http_event_server_ssl"]=hec_ssl
 
     return splunk_opts
