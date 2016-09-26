@@ -28,7 +28,6 @@ import socket
 import requests
 import json
 import time
-import os.path
 from collections import defaultdict
 
 import logging
@@ -49,8 +48,9 @@ def returner(ret):
     http_event_collector_key = opts['token']
     http_event_collector_host = opts['indexer']
     hec_ssl = opts['http_event_server_ssl']
+    proxy = opts['proxy']
     # Set up the collector
-    hec = http_event_collector(http_event_collector_key, http_event_collector_host, http_event_server_ssl=hec_ssl)
+    hec = http_event_collector(http_event_collector_key, http_event_collector_host, http_event_server_ssl=hec_ssl, proxy=proxy)
     # Check whether or not data is batched:
     if isinstance(ret, dict):  # Batching is disabled
         data = [ret]
@@ -145,7 +145,8 @@ def _get_options():
     splunk_opts = {"token": token, "indexer": indexer, "sourcetype": sourcetype, "index": index}
 
     hec_ssl = __salt__['config.get']('hubblestack:pulsar:returner:splunk:hec_ssl', True)
-    splunk_opts["http_event_server_ssl"]=hec_ssl
+    splunk_opts["http_event_server_ssl"] = hec_ssl
+    splunk_opts["proxy"] = __salt__['config.get']('hubblestack:pulsar:returner:splunk:proxy', {})
 
     return splunk_opts
 
@@ -157,11 +158,17 @@ def _get_options():
 
 class http_event_collector:
 
-    def __init__(self, token, http_event_server, host="", http_event_port='8088', http_event_server_ssl=True, max_bytes=_max_content_bytes):
+    def __init__(self, token, http_event_server, host="", http_event_port='8088', http_event_server_ssl=True, max_bytes=_max_content_bytes, proxy=None):
         self.token = token
         self.batchEvents = []
         self.maxByteLength = max_bytes
         self.currentByteLength = 0
+        if proxy and http_event_server_ssl:
+            self.proxy = {'https': 'https://{0}'.format(proxy)}
+        elif proxy:
+            self.proxy = {'http': 'http://{0}'.format(proxy)}
+        else:
+            self.proxy = {}
 
         # Set host to specified value or default to localhostname if no value provided
         if host:
@@ -203,7 +210,7 @@ class http_event_collector:
         data.update(payload)
 
         # send event to http event collector
-        r = requests.post(self.server_uri, data=json.dumps(data), headers=headers, verify=http_event_collector_SSL_verify)
+        r = requests.post(self.server_uri, data=json.dumps(data), headers=headers, verify=http_event_collector_SSL_verify, proxies=self.proxy)
 
         # Print debug info if flag set
         if http_event_collector_debug:
@@ -233,7 +240,6 @@ class http_event_collector:
         else:
             self.currentByteLength = self.currentByteLength + payloadLength
 
-
         self.batchEvents.append(payloadString)
 
     def flushBatch(self):
@@ -241,6 +247,6 @@ class http_event_collector:
 
         if len(self.batchEvents) > 0:
             headers = {'Authorization': 'Splunk ' + self.token}
-            r = requests.post(self.server_uri, data=" ".join(self.batchEvents), headers=headers, verify=http_event_collector_SSL_verify)
+            r = requests.post(self.server_uri, data=" ".join(self.batchEvents), headers=headers, verify=http_event_collector_SSL_verify, proxies=self.proxy)
             self.batchEvents = []
             self.currentByteLength = 0
