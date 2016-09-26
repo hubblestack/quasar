@@ -57,21 +57,24 @@ def returner(ret):
     jid = ret['jid']
     master = __grains__['master']
 
-    for query in data:
-        for query_name, query_results in query.iteritems():
-            for query_result in query_results['data']:
-                event = {}
-                payload = {}
-                event.update(query_result)
-                event.update({'query': query_name})
-                event.update({"master": master})
-                event.update({"minion_id": minion_id})
-                event.update({"job_id": jid})
-                payload.update({"host": minion_id})
-                payload.update({"index": opts['index']})
-                payload.update({"sourcetype": opts['sourcetype']})
-                payload.update({'event': event})
-                hec.batchEvent(payload)
+    if not data:
+        return
+    else:
+        for query in data:
+            for query_name, query_results in query.iteritems():
+                for query_result in query_results['data']:
+                    event = {}
+                    payload = {}
+                    event.update(query_result)
+                    event.update({'query': query_name})
+                    event.update({"master": master})
+                    event.update({"minion_id": minion_id})
+                    event.update({"job_id": jid})
+                    payload.update({"host": minion_id})
+                    payload.update({"index": opts['index']})
+                    payload.update({"sourcetype": opts['sourcetype']})
+                    payload.update({'event': event})
+                    hec.batchEvent(payload)
 
     hec.flushBatch()
     return
