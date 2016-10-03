@@ -47,8 +47,9 @@ def returner(ret):
     http_event_collector_host = opts['indexer']
     hec_ssl = opts['http_event_server_ssl']
     proxy = opts['proxy']
+    timeout = opts['timeout']
     # Set up the collector
-    hec = http_event_collector(http_event_collector_key, http_event_collector_host, http_event_server_ssl=hec_ssl, proxy=proxy)
+    hec = http_event_collector(http_event_collector_key, http_event_collector_host, http_event_server_ssl=hec_ssl, proxy=proxy, timeout=timeout)
     # st = "salt:hubble:nova"
     data = ret['return']
     minion_id = ret['id']
@@ -150,6 +151,7 @@ def _get_options():
     hec_ssl = __salt__['config.get']('hubblestack:nova:returner:splunk:hec_ssl', True)
     splunk_opts["http_event_server_ssl"] = hec_ssl
     splunk_opts["proxy"] = __salt__['config.get']('hubblestack:nova:returner:splunk:proxy', {})
+    splunk_opts['timeout'] = __salt__['config.get']('hubblestack:nova:returner:splunk:timeout', 9.05)
 
     return splunk_opts
 
@@ -186,7 +188,8 @@ def send_splunk(event, index_override=None, sourcetype_override=None):
 
 class http_event_collector:
 
-    def __init__(self, token, http_event_server, host="", http_event_port='8088', http_event_server_ssl=True, max_bytes=_max_content_bytes, proxy=None):
+    def __init__(self, token, http_event_server, host="", http_event_port='8088', http_event_server_ssl=True, max_bytes=_max_content_bytes, proxy=None, timeout=9.05):
+        self.timeout = timeout
         self.token = token
         self.batchEvents = []
         self.maxByteLength = max_bytes
@@ -277,6 +280,9 @@ class http_event_collector:
 
         if len(self.batchEvents) > 0:
             headers = {'Authorization': 'Splunk ' + self.token}
-            r = requests.post(self.server_uri, data=" ".join(self.batchEvents), headers=headers, verify=http_event_collector_SSL_verify, proxies=self.proxy)
+            try:
+                r = requests.post(self.server_uri, data=" ".join(self.batchEvents), headers=headers, verify=http_event_collector_SSL_verify, proxies=self.proxy, timeout=self.timeout)
+            except requests.exceptions.Timeout:
+                log.error('Request to splunk timed out. Not retrying.')
             self.batchEvents = []
             self.currentByteLength = 0
