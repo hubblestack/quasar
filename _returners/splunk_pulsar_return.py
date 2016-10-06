@@ -49,8 +49,9 @@ def returner(ret):
     http_event_collector_host = opts['indexer']
     hec_ssl = opts['http_event_server_ssl']
     proxy = opts['proxy']
+    timeout = opts['timeout']
     # Set up the collector
-    hec = http_event_collector(http_event_collector_key, http_event_collector_host, http_event_server_ssl=hec_ssl, proxy=proxy)
+    hec = http_event_collector(http_event_collector_key, http_event_collector_host, http_event_server_ssl=hec_ssl, proxy=proxy, timeout=timeout)
     # Check whether or not data is batched:
     if isinstance(ret, dict):  # Batching is disabled
         data = [ret]
@@ -60,7 +61,10 @@ def returner(ret):
     data = _dedupList(data)
     fqdn = __grains__['fqdn']
     master = __grains__['master']
-    fqdn_ip4 = __grains__['fqdn_ip4'][0]
+    try:
+        fqdn_ip4 = __grains__['fqdn_ip4'][0]
+    except IndexError:
+        fqdn_ip4 = __grains__['ipv4'][0]
 
     for item in data:
         alert = item['return']
@@ -147,6 +151,7 @@ def _get_options():
     hec_ssl = __salt__['config.get']('hubblestack:pulsar:returner:splunk:hec_ssl', True)
     splunk_opts["http_event_server_ssl"] = hec_ssl
     splunk_opts["proxy"] = __salt__['config.get']('hubblestack:pulsar:returner:splunk:proxy', {})
+    splunk_opts['timeout'] = __salt__['config.get']('hubblestack:pulsar:returner:splunk:timeout', 9.05)
 
     return splunk_opts
 
@@ -158,7 +163,8 @@ def _get_options():
 
 class http_event_collector:
 
-    def __init__(self, token, http_event_server, host="", http_event_port='8088', http_event_server_ssl=True, max_bytes=_max_content_bytes, proxy=None):
+    def __init__(self, token, http_event_server, host="", http_event_port='8088', http_event_server_ssl=True, max_bytes=_max_content_bytes, proxy=None, timeout=9.05):
+        self.timeout = timeout
         self.token = token
         self.batchEvents = []
         self.maxByteLength = max_bytes
@@ -247,6 +253,9 @@ class http_event_collector:
 
         if len(self.batchEvents) > 0:
             headers = {'Authorization': 'Splunk ' + self.token}
-            r = requests.post(self.server_uri, data=" ".join(self.batchEvents), headers=headers, verify=http_event_collector_SSL_verify, proxies=self.proxy)
+            try:
+                r = requests.post(self.server_uri, data=" ".join(self.batchEvents), headers=headers, verify=http_event_collector_SSL_verify, proxies=self.proxy, timeout=self.timeout)
+            except requests.exceptions.Timeout:
+                log.error('Request to splunk timed out. Not retrying.')
             self.batchEvents = []
             self.currentByteLength = 0
