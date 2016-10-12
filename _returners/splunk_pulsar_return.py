@@ -72,12 +72,12 @@ def returner(ret):
         event = {}
         payload = {}
         if('change' in alert):  # Linux, normal pulsar
-            # The second half of the change will be "|IN_ISDIR" for directories
-            change = alert['change'].split("|")[0]
+            # The second half of the change will be '|IN_ISDIR' for directories
+            change = alert['change'].split('|')[0]
             # Skip the IN_IGNORED events
-            if change == "IN_IGNORED":
+            if change == 'IN_IGNORED':
                 continue
-            if len(alert['change'].split("|")) == 2:
+            if len(alert['change'].split('|')) == 2:
                 object_type = 'directory'
             else:
                 object_type = 'file'
@@ -98,10 +98,10 @@ def returner(ret):
             actions['IN_MOVE'] = 'modified'
             actions['IN_CLOSE'] = 'read'
 
-            event["action"] = actions[change]
-            event["change_type"] = 'filesystem'
-            event["object_category"] = object_type
-            event["object_path"] = alert['path']
+            event['action'] = actions[change]
+            event['change_type'] = 'filesystem'
+            event['object_category'] = object_type
+            event['object_path'] = alert['path']
             event['file_name'] = alert['name']
             event['file_path'] = alert['tag']
 
@@ -148,10 +148,10 @@ def returner(ret):
             actions['Create Link'] = 'created'
             actions['Print'] = 'read'
 
-            event["action"] = actions[change]
-            event["change_type"] = 'filesystem'
-            event["object_category"] = object_type
-            event["object_path"] = alert['Object Name']
+            event['action'] = actions[change]
+            event['change_type'] = 'filesystem'
+            event['object_category'] = object_type
+            event['object_path'] = alert['Object Name']
             event['file_name'] = os.path.basename(alert['Object Name'])
             event['file_path'] = os.path.dirname(alert['Object Name'])
             # TODO: Should we be reporting 'EntryType' or 'TimeGenerated?
