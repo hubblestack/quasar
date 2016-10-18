@@ -69,6 +69,8 @@ import salt.ext.six.moves.http_client
 # Import Salt Libs
 import salt.returners
 
+__version__ = 'v2016.10.1'
+
 log = logging.getLogger(__name__)
 
 __virtualname__ = 'slack_pulsar'
@@ -276,9 +278,18 @@ def returner(ret):
         log.error('slack_pulsar.api_key not defined in salt config')
         return
 
-    message = ('id: {0}\r\n'
-               'return: {1}\r\n').format(__opts__['id'],
-                                         pprint.pformat(ret.get('return')))
+    if isinstance(ret, dict):
+        message = ('id: {0}\r\n'
+                   'return: {1}\r\n').format(__opts__['id'],
+                                             pprint.pformat(ret.get('return')))
+    elif isinstance(ret, list):
+        message = 'id: {0}\r\n'
+        for r in ret:
+            message += pprint.pformat(r.get('return'))
+            message += '\r\n'
+    else:
+        log.error('Data sent to slack_pulsar formatted incorrectly')
+        return
 
     slack = _post_message(channel,
                           message,

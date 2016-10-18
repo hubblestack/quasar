@@ -30,6 +30,8 @@ import time
 
 import logging
 
+__version__ = 'v2016.10.1'
+
 _max_content_bytes = 100000
 http_event_collector_SSL_verify = False
 http_event_collector_debug = True
@@ -45,8 +47,11 @@ def returner(ret):
     logging.info("Options: %s" % json.dumps(opts))
     http_event_collector_key = opts['token']
     http_event_collector_host = opts['indexer']
+    hec_ssl = opts['http_event_server_ssl']
+    proxy = opts['proxy']
+    timeout = opts['timeout']
     # Set up the collector
-    hec = http_event_collector(http_event_collector_key, http_event_collector_host)
+    hec = http_event_collector(http_event_collector_key, http_event_collector_host, http_event_server_ssl=hec_ssl, proxy=proxy, timeout=timeout)
     # st = "salt:hubble:nova"
     data = ret['return']
     minion_id = ret['id']
@@ -55,7 +60,7 @@ def returner(ret):
     if __grains__['master']:
         master = __grains__['master']
     else:
-        master = socket.gethostname() # We *are* the master, so use our hostname
+        master = socket.gethostname()  # We *are* the master, so use our hostname
 
     for fai in data.get('Failure', []):
         check_id = fai.keys()[0]
@@ -144,6 +149,12 @@ def _get_options():
     except:
         return None
     splunk_opts = {"token": token, "indexer": indexer, "sourcetype": sourcetype, "index": index}
+
+    hec_ssl = __salt__['config.get']('hubblestack:nova:returner:splunk:hec_ssl', True)
+    splunk_opts["http_event_server_ssl"] = hec_ssl
+    splunk_opts["proxy"] = __salt__['config.get']('hubblestack:nova:returner:splunk:proxy', {})
+    splunk_opts['timeout'] = __salt__['config.get']('hubblestack:nova:returner:splunk:timeout', 9.05)
+
     return splunk_opts
 
 
@@ -179,11 +190,18 @@ def send_splunk(event, index_override=None, sourcetype_override=None):
 
 class http_event_collector:
 
-    def __init__(self, token, http_event_server, host="", http_event_port='8088', http_event_server_ssl=True, max_bytes=_max_content_bytes):
+    def __init__(self, token, http_event_server, host="", http_event_port='8088', http_event_server_ssl=True, max_bytes=_max_content_bytes, proxy=None, timeout=9.05):
+        self.timeout = timeout
         self.token = token
         self.batchEvents = []
         self.maxByteLength = max_bytes
         self.currentByteLength = 0
+        if proxy and http_event_server_ssl:
+            self.proxy = {'https': 'https://{0}'.format(proxy)}
+        elif proxy:
+            self.proxy = {'http': 'http://{0}'.format(proxy)}
+        else:
+            self.proxy = {}
 
         # Set host to specified value or default to localhostname if no value provided
         if host:
@@ -225,7 +243,7 @@ class http_event_collector:
         data.update(payload)
 
         # send event to http event collector
-        r = requests.post(self.server_uri, data=json.dumps(data), headers=headers, verify=http_event_collector_SSL_verify)
+        r = requests.post(self.server_uri, data=json.dumps(data), headers=headers, verify=http_event_collector_SSL_verify, proxies=self.proxy)
 
         # Print debug info if flag set
         if http_event_collector_debug:
@@ -264,6 +282,9 @@ class http_event_collector:
 
         if len(self.batchEvents) > 0:
             headers = {'Authorization': 'Splunk ' + self.token}
-            r = requests.post(self.server_uri, data=" ".join(self.batchEvents), headers=headers, verify=http_event_collector_SSL_verify)
+            try:
+                r = requests.post(self.server_uri, data=" ".join(self.batchEvents), headers=headers, verify=http_event_collector_SSL_verify, proxies=self.proxy, timeout=self.timeout)
+            except requests.exceptions.Timeout:
+                log.error('Request to splunk timed out. Not retrying.')
             self.batchEvents = []
             self.currentByteLength = 0
