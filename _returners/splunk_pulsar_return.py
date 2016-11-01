@@ -47,7 +47,7 @@ hec = None
 def returner(ret):
     # Customized to split up the change events and send to Splunk.
     opts = _get_options()
-    logging.info("Options: %s" % json.dumps(opts))
+    logging.info('Options: %s' % json.dumps(opts))
     http_event_collector_key = opts['token']
     http_event_collector_host = opts['indexer']
     hec_ssl = opts['http_event_server_ssl']
@@ -62,6 +62,7 @@ def returner(ret):
         data = ret
     # Sometimes there are duplicate events in the list. Dedup them:
     data = _dedupList(data)
+    minion_id = __opts__['id']
     fqdn = __grains__['fqdn']
     master = __grains__['master']
     try:
@@ -159,12 +160,13 @@ def returner(ret):
             # TODO: Should we be reporting 'EntryType' or 'TimeGenerated?
             #   EntryType reports whether attempt to change was successful.
 
-        event.update({"master": master})
-        event.update({"dest_host": fqdn})
-        event.update({"dest_ip": fqdn_ip4})
-        payload.update({"host": fqdn})
-        payload.update({"index": opts['index']})
-        payload.update({"sourcetype": opts['sourcetype']})
+        event.update({'master': master})
+        event.update({'minion_id': minion_id})
+        event.update({'dest_host': fqdn})
+        event.update({'dest_ip': fqdn_ip4})
+        payload.update({'host': fqdn})
+        payload.update({'index': opts['index']})
+        payload.update({'sourcetype': opts['sourcetype']})
         payload.update({'event': event})
         hec.batchEvent(payload)
 
@@ -188,11 +190,11 @@ def _get_options():
         index = __salt__['config.get']('hubblestack:pulsar:returner:splunk:index')
     except:
         return None
-    splunk_opts = {"token": token, "indexer": indexer, "sourcetype": sourcetype, "index": index}
+    splunk_opts = {'token': token, 'indexer': indexer, 'sourcetype': sourcetype, 'index': index}
 
     hec_ssl = __salt__['config.get']('hubblestack:pulsar:returner:splunk:hec_ssl', True)
-    splunk_opts["http_event_server_ssl"] = hec_ssl
-    splunk_opts["proxy"] = __salt__['config.get']('hubblestack:pulsar:returner:splunk:proxy', {})
+    splunk_opts['http_event_server_ssl'] = hec_ssl
+    splunk_opts['proxy'] = __salt__['config.get']('hubblestack:pulsar:returner:splunk:proxy', {})
     splunk_opts['timeout'] = __salt__['config.get']('hubblestack:pulsar:returner:splunk:timeout', 9.05)
 
     return splunk_opts
@@ -205,7 +207,7 @@ def _get_options():
 
 class http_event_collector:
 
-    def __init__(self, token, http_event_server, host="", http_event_port='8088', http_event_server_ssl=True, max_bytes=_max_content_bytes, proxy=None, timeout=9.05):
+    def __init__(self, token, http_event_server, host='', http_event_port='8088', http_event_server_ssl=True, max_bytes=_max_content_bytes, proxy=None, timeout=9.05):
         self.timeout = timeout
         self.token = token
         self.batchEvents = []
@@ -234,13 +236,13 @@ class http_event_collector:
             buildURI = ['http://']
         for i in [http_event_server, ':', http_event_port, '/services/collector/event']:
             buildURI.append(i)
-        self.server_uri = "".join(buildURI)
+        self.server_uri = ''.join(buildURI)
 
         if http_event_collector_debug:
             print self.token
             print self.server_uri
 
-    def sendEvent(self, payload, eventtime=""):
+    def sendEvent(self, payload, eventtime=''):
         # Method to immediately send an event to the http event collector
 
         headers = {'Authorization': 'Splunk ' + self.token}
@@ -251,10 +253,10 @@ class http_event_collector:
 
         # Fill in local hostname if not manually populated
         if 'host' not in payload:
-            payload.update({"host": self.host})
+            payload.update({'host': self.host})
 
         # Update time value on payload if need to use system time
-        data = {"time": eventtime}
+        data = {'time': eventtime}
         data.update(payload)
 
         # send event to http event collector
@@ -265,17 +267,17 @@ class http_event_collector:
             logger.debug(r.text)
             logger.debug(data)
 
-    def batchEvent(self, payload, eventtime=""):
+    def batchEvent(self, payload, eventtime=''):
         # Method to store the event in a batch to flush later
 
         # Fill in local hostname if not manually populated
         if 'host' not in payload:
-            payload.update({"host": self.host})
+            payload.update({'host': self.host})
 
         # If eventtime in epoch not passed as optional argument and not in payload, use current system time in epoch
         if not eventtime and 'time' not in payload:
             eventtime = time.time()
-            payload.update({"time": eventtime})
+            payload.update({'time': eventtime})
 
         payloadString = json.dumps(payload)
         payloadLength = len(payloadString)
@@ -284,7 +286,7 @@ class http_event_collector:
             self.flushBatch()
             # Print debug info if flag set
             if http_event_collector_debug:
-                print "auto flushing"
+                print 'auto flushing'
         else:
             self.currentByteLength = self.currentByteLength + payloadLength
 
@@ -296,7 +298,7 @@ class http_event_collector:
         if len(self.batchEvents) > 0:
             headers = {'Authorization': 'Splunk ' + self.token}
             try:
-                r = requests.post(self.server_uri, data=" ".join(self.batchEvents), headers=headers, verify=http_event_collector_SSL_verify, proxies=self.proxy, timeout=self.timeout)
+                r = requests.post(self.server_uri, data=' '.join(self.batchEvents), headers=headers, verify=http_event_collector_SSL_verify, proxies=self.proxy, timeout=self.timeout)
             except requests.exceptions.Timeout:
                 log.error('Request to splunk timed out. Not retrying.')
             self.batchEvents = []
