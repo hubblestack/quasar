@@ -45,7 +45,7 @@ def returner(ret):
     # Customized to split up the queries and extract the correct sourcetype
 
     opts = _get_options()
-    logging.info("Options: %s" % json.dumps(opts))
+    logging.info('Options: %s' % json.dumps(opts))
     http_event_collector_key = opts['token']
     http_event_collector_host = opts['indexer']
     hec_ssl = opts['http_event_server_ssl']
@@ -54,11 +54,16 @@ def returner(ret):
     # Set up the collector
     hec = http_event_collector(http_event_collector_key, http_event_collector_host, http_event_server_ssl=hec_ssl, proxy=proxy, timeout=timeout)
 
-    # st = "salt:hubble:nova"
+    # st = 'salt:hubble:nova'
     data = ret['return']
     minion_id = ret['id']
     jid = ret['jid']
     master = __grains__['master']
+    fqdn = __grains__['fqdn']
+    try:
+        fqdn_ip4 = __grains__['fqdn_ip4'][0]
+    except IndexError:
+        fqdn_ip4 = __grains__['ipv4'][0]
 
     if not data:
         return
@@ -70,12 +75,14 @@ def returner(ret):
                     payload = {}
                     event.update(query_result)
                     event.update({'query': query_name})
-                    event.update({"master": master})
-                    event.update({"minion_id": minion_id})
-                    event.update({"job_id": jid})
-                    payload.update({"host": minion_id})
-                    payload.update({"index": opts['index']})
-                    payload.update({"sourcetype": opts['sourcetype']})
+                    event.update({'job_id': jid})
+                    event.update({'master': master})
+                    event.update({'minion_id': minion_id})
+                    event.update({'dest_host': fqdn})
+                    event.update({'dest_ip': fqdn_ip4})
+                    payload.update({'host': fqdn})
+                    payload.update({'index': opts['index']})
+                    payload.update({'sourcetype': opts['sourcetype']})
                     payload.update({'event': event})
                     hec.batchEvent(payload)
 
@@ -91,11 +98,11 @@ def _get_options():
         index = __salt__['config.get']('hubblestack:nebula:returner:splunk:index')
     except:
         return None
-    splunk_opts = {"token": token, "indexer": indexer, "sourcetype": sourcetype, "index": index}
+    splunk_opts = {'token': token, 'indexer': indexer, 'sourcetype': sourcetype, 'index': index}
 
     hec_ssl = __salt__['config.get']('hubblestack:nebula:returner:splunk:hec_ssl', True)
-    splunk_opts["http_event_server_ssl"] = hec_ssl
-    splunk_opts["proxy"] = __salt__['config.get']('hubblestack:nebula:returner:splunk:proxy', {})
+    splunk_opts['http_event_server_ssl'] = hec_ssl
+    splunk_opts['proxy'] = __salt__['config.get']('hubblestack:nebula:returner:splunk:proxy', {})
     splunk_opts['timeout'] = __salt__['config.get']('hubblestack:nebula:returner:splunk:timeout', 9.05)
 
     return splunk_opts
@@ -108,18 +115,18 @@ def send_splunk(event, index_override=None, sourcetype_override=None):
 
     # Set up the event metadata
     if index_override is None:
-        payload.update({"index": opts['index']})
+        payload.update({'index': opts['index']})
     else:
-        payload.update({"index": index_override})
+        payload.update({'index': index_override})
 
     if sourcetype_override is None:
-        payload.update({"sourcetype": opts['sourcetype']})
+        payload.update({'sourcetype': opts['sourcetype']})
     else:
-        payload.update({"sourcetype": sourcetype_override})
+        payload.update({'sourcetype': sourcetype_override})
 
     # Add the event
-    payload.update({"event": event})
-    logging.info("Payload: %s" % json.dumps(payload))
+    payload.update({'event': event})
+    logging.info('Payload: %s' % json.dumps(payload))
 
     # fire it off
     hec.batchEvent(payload)
@@ -133,7 +140,7 @@ def send_splunk(event, index_override=None, sourcetype_override=None):
 
 class http_event_collector:
 
-    def __init__(self, token, http_event_server, host="", http_event_port='8088', http_event_server_ssl=True, max_bytes=_max_content_bytes, proxy=None, timeout=9.05):
+    def __init__(self, token, http_event_server, host='', http_event_port='8088', http_event_server_ssl=True, max_bytes=_max_content_bytes, proxy=None, timeout=9.05):
         self.timeout = timeout
         self.token = token
         self.batchEvents = []
@@ -162,13 +169,13 @@ class http_event_collector:
             buildURI = ['http://']
         for i in [http_event_server, ':', http_event_port, '/services/collector/event']:
             buildURI.append(i)
-        self.server_uri = "".join(buildURI)
+        self.server_uri = ''.join(buildURI)
 
         if http_event_collector_debug:
             print self.token
             print self.server_uri
 
-    def sendEvent(self, payload, eventtime=""):
+    def sendEvent(self, payload, eventtime=''):
         # Method to immediately send an event to the http event collector
 
         headers = {'Authorization': 'Splunk ' + self.token}
@@ -179,10 +186,10 @@ class http_event_collector:
 
         # Fill in local hostname if not manually populated
         if 'host' not in payload:
-            payload.update({"host": self.host})
+            payload.update({'host': self.host})
 
         # Update time value on payload if need to use system time
-        data = {"time": eventtime}
+        data = {'time': eventtime}
         data.update(payload)
 
         # send event to http event collector
@@ -193,12 +200,12 @@ class http_event_collector:
             logger.debug(r.text)
             logger.debug(data)
 
-    def batchEvent(self, payload, eventtime=""):
+    def batchEvent(self, payload, eventtime=''):
         # Method to store the event in a batch to flush later
 
         # Fill in local hostname if not manually populated
         if 'host' not in payload:
-            payload.update({"host": self.host})
+            payload.update({'host': self.host})
 
         payloadLength = len(json.dumps(payload))
 
@@ -206,7 +213,7 @@ class http_event_collector:
             self.flushBatch()
             # Print debug info if flag set
             if http_event_collector_debug:
-                print "auto flushing"
+                print 'auto flushing'
         else:
             self.currentByteLength = self.currentByteLength + payloadLength
 
@@ -215,7 +222,7 @@ class http_event_collector:
             eventtime = str(int(time.time()))
 
         # Update time value on payload if need to use system time
-        data = {"time": eventtime}
+        data = {'time': eventtime}
         data.update(payload)
 
         self.batchEvents.append(json.dumps(data))
@@ -226,7 +233,7 @@ class http_event_collector:
         if len(self.batchEvents) > 0:
             headers = {'Authorization': 'Splunk ' + self.token}
             try:
-                r = requests.post(self.server_uri, data=" ".join(self.batchEvents), headers=headers, verify=http_event_collector_SSL_verify, proxies=self.proxy, timeout=self.timeout)
+                r = requests.post(self.server_uri, data=' '.join(self.batchEvents), headers=headers, verify=http_event_collector_SSL_verify, proxies=self.proxy, timeout=self.timeout)
             except requests.exceptions.Timeout:
                 log.error('Request to splunk timed out. Not retrying.')
             self.batchEvents = []
