@@ -236,5 +236,7 @@ class http_event_collector:
                 r = requests.post(self.server_uri, data=' '.join(self.batchEvents), headers=headers, verify=http_event_collector_SSL_verify, proxies=self.proxy, timeout=self.timeout)
             except requests.exceptions.Timeout:
                 log.error('Request to splunk timed out. Not retrying.')
+            except Exception as e:
+                log.error('Request to splunk threw an error: {0}'.format(e))
             self.batchEvents = []
             self.currentByteLength = 0
