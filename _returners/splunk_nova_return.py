@@ -150,7 +150,7 @@ def event_return(event):
 
 def _get_options():
     try:
-        token = __salt__['config.get']('hubblestack:nova:returner:splunk:token')
+        token = __salt__['config.get']('hubblestack:nova:returner:splunk:token').strip()
         indexer = __salt__['config.get']('hubblestack:nova:returner:splunk:indexer')
         sourcetype = __salt__['config.get']('hubblestack:nova:returner:splunk:sourcetype')
         index = __salt__['config.get']('hubblestack:nova:returner:splunk:index')

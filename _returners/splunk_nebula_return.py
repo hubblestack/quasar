@@ -92,7 +92,7 @@ def returner(ret):
 
 def _get_options():
     try:
-        token = __salt__['config.get']('hubblestack:nebula:returner:splunk:token')
+        token = __salt__['config.get']('hubblestack:nebula:returner:splunk:token').strip()
         indexer = __salt__['config.get']('hubblestack:nebula:returner:splunk:indexer')
         sourcetype = __salt__['config.get']('hubblestack:nebula:returner:splunk:sourcetype')
         index = __salt__['config.get']('hubblestack:nebula:returner:splunk:index')

@@ -184,7 +184,7 @@ def _dedupList(l):
 
 def _get_options():
     try:
-        token = __salt__['config.get']('hubblestack:pulsar:returner:splunk:token')
+        token = __salt__['config.get']('hubblestack:pulsar:returner:splunk:token').strip()
         indexer = __salt__['config.get']('hubblestack:pulsar:returner:splunk:indexer')
         sourcetype = __salt__['config.get']('hubblestack:pulsar:returner:splunk:sourcetype')
         index = __salt__['config.get']('hubblestack:pulsar:returner:splunk:index')
