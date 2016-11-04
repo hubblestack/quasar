@@ -20,6 +20,26 @@ event collector. Required config/pillar settings:
             indexer: <hostname/IP of Splunk indexer>
             sourcetype: <Destination sourcetype for data>
             index: <Destination index for data>
+
+You can also add an `extras` argument which is a list of keys to add to events
+with using the results of config.get(<extra>). These new keys will be prefixed
+with 'custom_' to prevent conflicts. The values of these keys should be
+strings, do not choose grains or pillar values with complex values or they will
+be skipped:
+
+.. code-block:: yaml
+
+    hubblestack:
+      nova:
+        returner:
+          splunk:
+            token: <splunk_http_forwarder_token>
+            indexer: <hostname/IP of Splunk indexer>
+            sourcetype: <Destination sourcetype for data>
+            index: <Destination index for data>
+            extras:
+              - site
+              - product_group
 '''
 import socket
 
@@ -50,6 +70,7 @@ def returner(ret):
     hec_ssl = opts['http_event_server_ssl']
     proxy = opts['proxy']
     timeout = opts['timeout']
+    extras = opts['extras']
     # Set up the collector
     hec = http_event_collector(http_event_collector_key, http_event_collector_host, http_event_server_ssl=hec_ssl, proxy=proxy, timeout=timeout)
     # st = 'salt:hubble:nova'
@@ -85,6 +106,13 @@ def returner(ret):
         event.update({'minion_id': minion_id})
         event.update({'dest_host': fqdn})
         event.update({'dest_ip': fqdn_ip4})
+
+        for extra in extras:
+            extra_name = 'custom_' + extra
+            extra_value = __salt__['config.get'](extra, '')
+            if isinstance(extra_value, str):
+                event.update({extra_name: extra_value})
+
         payload.update({'host': fqdn})
         payload.update({'index': opts['index']})
         payload.update({'sourcetype': opts['sourcetype']})
@@ -95,17 +123,26 @@ def returner(ret):
         check_id = suc.keys()[0]
         payload = {}
         event = {}
-        event.update({'minion_id': minion_id})
         event.update({'check_result': 'Success'})
         event.update({'check_id': check_id})
         event.update({'job_id': jid})
-        event.update({'master': master})
         if not isinstance(suc[check_id], dict):
             event.update({'description': suc[check_id]})
         elif 'description' in suc[check_id]:
             for key, value in suc[check_id].iteritems():
                 if key not in ['tag']:
                     event[key] = value
+        event.update({'master': master})
+        event.update({'minion_id': minion_id})
+        event.update({'dest_host': fqdn})
+        event.update({'dest_ip': fqdn_ip4})
+
+        for extra in extras:
+            extra_name = 'custom_' + extra
+            extra_value = __salt__['config.get'](extra, '')
+            if isinstance(extra_value, str):
+                event.update({extra_name: extra_value})
+
         payload.update({'host': minion_id})
         payload.update({'sourcetype': opts['sourcetype']})
         payload.update({'index': opts['index']})
@@ -115,10 +152,19 @@ def returner(ret):
     if data.get('Compliance', None):
         payload = {}
         event = {}
-        event.update({'minion_id': minion_id})
         event.update({'job_id': jid})
-        event.update({'master': master})
         event.update({'compliance_percentage': data['Compliance']})
+        event.update({'master': master})
+        event.update({'minion_id': minion_id})
+        event.update({'dest_host': fqdn})
+        event.update({'dest_ip': fqdn_ip4})
+
+        for extra in extras:
+            extra_name = 'custom_' + extra
+            extra_value = __salt__['config.get'](extra, '')
+            if isinstance(extra_value, str):
+                event.update({extra_name: extra_value})
+
         payload.update({'host': minion_id})
         payload.update({'sourcetype': opts['sourcetype']})
         payload.update({'index': opts['index']})
@@ -154,6 +200,7 @@ def _get_options():
         indexer = __salt__['config.get']('hubblestack:nova:returner:splunk:indexer')
         sourcetype = __salt__['config.get']('hubblestack:nova:returner:splunk:sourcetype')
         index = __salt__['config.get']('hubblestack:nova:returner:splunk:index')
+        extras = __salt__['config.get']('hubblestack:nebula:returner:splunk:extras', [])
     except:
         return None
     splunk_opts = {'token': token, 'indexer': indexer, 'sourcetype': sourcetype, 'index': index}
