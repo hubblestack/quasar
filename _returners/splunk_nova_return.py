@@ -21,8 +21,8 @@ event collector. Required config/pillar settings:
             sourcetype: <Destination sourcetype for data>
             index: <Destination index for data>
 
-You can also add an `extras` argument which is a list of keys to add to events
-with using the results of config.get(<extra>). These new keys will be prefixed
+You can also add an `custom_fields` argument which is a list of keys to add to events
+with using the results of config.get(<custom_field>). These new keys will be prefixed
 with 'custom_' to prevent conflicts. The values of these keys should be
 strings, do not choose grains or pillar values with complex values or they will
 be skipped:
@@ -37,7 +37,7 @@ be skipped:
             indexer: <hostname/IP of Splunk indexer>
             sourcetype: <Destination sourcetype for data>
             index: <Destination index for data>
-            extras:
+            custom_fields:
               - site
               - product_group
 '''
@@ -70,7 +70,7 @@ def returner(ret):
     hec_ssl = opts['http_event_server_ssl']
     proxy = opts['proxy']
     timeout = opts['timeout']
-    extras = opts['extras']
+    custom_fields = opts['custom_fields']
     # Set up the collector
     hec = http_event_collector(http_event_collector_key, http_event_collector_host, http_event_server_ssl=hec_ssl, proxy=proxy, timeout=timeout)
     # st = 'salt:hubble:nova'
@@ -107,11 +107,14 @@ def returner(ret):
         event.update({'dest_host': fqdn})
         event.update({'dest_ip': fqdn_ip4})
 
-        for extra in extras:
-            extra_name = 'custom_' + extra
-            extra_value = __salt__['config.get'](extra, '')
-            if isinstance(extra_value, str):
-                event.update({extra_name: extra_value})
+        for custom_field in custom_fields:
+            custom_field_name = 'custom_' + custom_field
+            custom_field_value = __salt__['config.get'](custom_field, '')
+            if isinstance(custom_field_value, str):
+                event.update({custom_field_name: custom_field_value})
+            elif isinstance(custom_field_value, list):
+                custom_field_value = ','.join(custom_field_value)
+                event.update({custom_field_name: custom_field_value})
 
         payload.update({'host': fqdn})
         payload.update({'index': opts['index']})
@@ -137,11 +140,14 @@ def returner(ret):
         event.update({'dest_host': fqdn})
         event.update({'dest_ip': fqdn_ip4})
 
-        for extra in extras:
-            extra_name = 'custom_' + extra
-            extra_value = __salt__['config.get'](extra, '')
-            if isinstance(extra_value, str):
-                event.update({extra_name: extra_value})
+        for custom_field in custom_fields:
+            custom_field_name = 'custom_' + custom_field
+            custom_field_value = __salt__['config.get'](custom_field, '')
+            if isinstance(custom_field_value, str):
+                event.update({custom_field_name: custom_field_value})
+            elif isinstance(custom_field_value, list):
+                custom_field_value = ','.join(custom_field_value)
+                event.update({custom_field_name: custom_field_value})
 
         payload.update({'host': minion_id})
         payload.update({'sourcetype': opts['sourcetype']})
@@ -159,11 +165,14 @@ def returner(ret):
         event.update({'dest_host': fqdn})
         event.update({'dest_ip': fqdn_ip4})
 
-        for extra in extras:
-            extra_name = 'custom_' + extra
-            extra_value = __salt__['config.get'](extra, '')
-            if isinstance(extra_value, str):
-                event.update({extra_name: extra_value})
+        for custom_field in custom_fields:
+            custom_field_name = 'custom_' + custom_field
+            custom_field_value = __salt__['config.get'](custom_field, '')
+            if isinstance(custom_field_value, str):
+                event.update({custom_field_name: custom_field_value})
+            elif isinstance(custom_field_value, list):
+                custom_field_value = ','.join(custom_field_value)
+                event.update({custom_field_name: custom_field_value})
 
         payload.update({'host': minion_id})
         payload.update({'sourcetype': opts['sourcetype']})
@@ -200,10 +209,10 @@ def _get_options():
         indexer = __salt__['config.get']('hubblestack:nova:returner:splunk:indexer')
         sourcetype = __salt__['config.get']('hubblestack:nova:returner:splunk:sourcetype')
         index = __salt__['config.get']('hubblestack:nova:returner:splunk:index')
-        extras = __salt__['config.get']('hubblestack:nebula:returner:splunk:extras', [])
+        custom_fields = __salt__['config.get']('hubblestack:nebula:returner:splunk:custom_fields', [])
     except:
         return None
-    splunk_opts = {'token': token, 'indexer': indexer, 'sourcetype': sourcetype, 'index': index, 'extras': extras}
+    splunk_opts = {'token': token, 'indexer': indexer, 'sourcetype': sourcetype, 'index': index, 'custom_fields': custom_fields}
 
     hec_ssl = __salt__['config.get']('hubblestack:nova:returner:splunk:hec_ssl', True)
     splunk_opts['http_event_server_ssl'] = hec_ssl
