@@ -106,6 +106,25 @@ Target the ``hubblestack_quasar.sls`` extension and target it to selected minion
 
 Once these modules are synced you'll be ready to begin reporting data and events.
 
+Installation (GitFS)
+--------------------
+
+This installation method subscribes directly to our GitHub repository, pinning
+to a tag or branch. This method requires no package installation or manual
+checkouts.
+
+Requirements: GitFS support on your Salt Master.
+
+**/etc/salt/master.d/hubblestack-quasar.conf**
+
+.. code-block:: diff
+
+    gitfs_remotes:
+      - https://github.com/hubblestack/quasar:
+        - base: v2016.10.3
+
+.. tip:: Remember to restart the Salt Master after applying this change.
+
 .. _quasar_usage:
 
 Usage

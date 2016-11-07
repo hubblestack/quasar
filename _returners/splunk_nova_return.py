@@ -3,7 +3,7 @@
 HubbleStack Nova-to-Splunk returner
 
 :maintainer: HubbleStack
-:maturity: 2016.7.0
+:maturity: 2016.10.3
 :platform: All
 :requires: SaltStack
 
