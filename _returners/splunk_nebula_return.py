@@ -3,7 +3,7 @@
 HubbleStack Nebula-to-Splunk returner
 
 :maintainer: HubbleStack
-:maturity: 2016.10.3
+:maturity: 2016.10.4
 :platform: All
 :requires: SaltStack
 
@@ -50,7 +50,7 @@ import time
 
 import logging
 
-__version__ = 'v2016.10.3'
+__version__ = 'v2016.10.4'
 
 _max_content_bytes = 100000
 http_event_collector_SSL_verify = False
