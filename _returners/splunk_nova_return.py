@@ -149,7 +149,7 @@ def returner(ret):
                 custom_field_value = ','.join(custom_field_value)
                 event.update({custom_field_name: custom_field_value})
 
-        payload.update({'host': minion_id})
+        payload.update({'host': fqdn})
         payload.update({'sourcetype': opts['sourcetype']})
         payload.update({'index': opts['index']})
         payload.update({'event': event})
@@ -174,7 +174,7 @@ def returner(ret):
                 custom_field_value = ','.join(custom_field_value)
                 event.update({custom_field_name: custom_field_value})
 
-        payload.update({'host': minion_id})
+        payload.update({'host': fqdn})
         payload.update({'sourcetype': opts['sourcetype']})
         payload.update({'index': opts['index']})
         payload.update({'event': event})
