@@ -3,7 +3,7 @@
 HubbleStack Pulsar-to-Splunk returner
 
 :maintainer: HubbleStack
-:maturity: 2016.7.0
+:maturity: 2016.10.4
 :platform: All
 :requires: SaltStack
 
@@ -20,6 +20,26 @@ event collector. Required config/pillar settings:
             indexer: <hostname/IP of Splunk indexer>
             sourcetype: <Destination sourcetype for data>
             index: <Destination index for data>
+
+You can also add an `custom_fields` argument which is a list of keys to add to events
+with using the results of config.get(<custom_field>). These new keys will be prefixed
+with 'custom_' to prevent conflicts. The values of these keys should be
+strings, do not choose grains or pillar values with complex values or they will
+be skipped:
+
+.. code-block:: yaml
+
+    hubblestack:
+      pulsar:
+        returner:
+          splunk:
+            token: <splunk_http_forwarder_token>
+            indexer: <hostname/IP of Splunk indexer>
+            sourcetype: <Destination sourcetype for data>
+            index: <Destination index for data>
+            custom_fields:
+              - site
+              - product_group
 '''
 
 import socket
@@ -33,7 +53,7 @@ from collections import defaultdict
 
 import logging
 
-__version__ = 'v2016.10.3'
+__version__ = 'v2016.10.4'
 
 _max_content_bytes = 100000
 http_event_collector_SSL_verify = False
@@ -53,6 +73,7 @@ def returner(ret):
     hec_ssl = opts['http_event_server_ssl']
     proxy = opts['proxy']
     timeout = opts['timeout']
+    custom_fields = opts['custom_fields']
     # Set up the collector
     hec = http_event_collector(http_event_collector_key, http_event_collector_host, http_event_server_ssl=hec_ssl, proxy=proxy, timeout=timeout)
     # Check whether or not data is batched:
@@ -164,6 +185,16 @@ def returner(ret):
         event.update({'minion_id': minion_id})
         event.update({'dest_host': fqdn})
         event.update({'dest_ip': fqdn_ip4})
+
+        for custom_field in custom_fields:
+            custom_field_name = 'custom_' + custom_field
+            custom_field_value = __salt__['config.get'](custom_field, '')
+            if isinstance(custom_field_value, str):
+                event.update({custom_field_name: custom_field_value})
+            elif isinstance(custom_field_value, list):
+                custom_field_value = ','.join(custom_field_value)
+                event.update({custom_field_name: custom_field_value})
+
         payload.update({'host': fqdn})
         payload.update({'index': opts['index']})
         payload.update({'sourcetype': opts['sourcetype']})
@@ -188,9 +219,10 @@ def _get_options():
         indexer = __salt__['config.get']('hubblestack:pulsar:returner:splunk:indexer')
         sourcetype = __salt__['config.get']('hubblestack:pulsar:returner:splunk:sourcetype')
         index = __salt__['config.get']('hubblestack:pulsar:returner:splunk:index')
+        custom_fields = __salt__['config.get']('hubblestack:nebula:returner:splunk:custom_fields', [])
     except:
         return None
-    splunk_opts = {'token': token, 'indexer': indexer, 'sourcetype': sourcetype, 'index': index}
+    splunk_opts = {'token': token, 'indexer': indexer, 'sourcetype': sourcetype, 'index': index, 'custom_fields': custom_fields}
 
     hec_ssl = __salt__['config.get']('hubblestack:pulsar:returner:splunk:hec_ssl', True)
     splunk_opts['http_event_server_ssl'] = hec_ssl
