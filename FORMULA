@@ -1,7 +1,7 @@
 name: hubblestack_quasar
 os: RedHat, CentOS, Debian, Ubuntu
 os_family: RedHat, Debian
-version: 2016.10.3
+version: 2016.10.4
 release: 1
 summary: HubbleStack Quasar
 description: HubbleStack Quasar

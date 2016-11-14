@@ -48,8 +48,8 @@ repo for updates and bugfixes!)
 
 .. code-block:: shell
 
-    wget https://spm.hubblestack.io/quasar/hubblestack_quasar-2016.10.3-1.spm
-    spm local install hubblestack_quasar-2016.10.3-1.spm
+    wget https://spm.hubblestack.io/quasar/hubblestack_quasar-2016.10.4-1.spm
+    spm local install hubblestack_quasar-2016.10.4-1.spm
 
 You should now be able to sync the new modules to your minion(s) using the
 ``sync_returners`` Salt utility:
@@ -121,7 +121,7 @@ Requirements: GitFS support on your Salt Master.
 
     gitfs_remotes:
       - https://github.com/hubblestack/quasar:
-        - base: v2016.10.3
+        - base: v2016.10.4
 
 .. tip:: Remember to restart the Salt Master after applying this change.
 
