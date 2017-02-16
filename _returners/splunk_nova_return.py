@@ -54,7 +54,7 @@ __version__ = 'v2016.10.4'
 
 _max_content_bytes = 100000
 http_event_collector_SSL_verify = False
-http_event_collector_debug = True
+http_event_collector_debug = False
 
 log = logging.getLogger(__name__)
 
