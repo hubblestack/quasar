@@ -91,6 +91,8 @@ def returner(ret):
     minion_id = ret['id']
     jid = ret['jid']
     fqdn = __grains__['fqdn']
+    # Sometimes fqdn is blank. If it is, replace it with minion_id
+    fqdn = minion_id if fqdn == "" else fqdn
     master = __grains__['master']
     try:
         fqdn_ip4 = __grains__['fqdn_ip4'][0]
