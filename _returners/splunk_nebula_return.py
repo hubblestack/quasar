@@ -3,7 +3,6 @@
 HubbleStack Nebula-to-Splunk returner
 
 :maintainer: HubbleStack
-:maturity: 2016.10.4
 :platform: All
 :requires: SaltStack
 
@@ -13,13 +12,12 @@ event collector. Required config/pillar settings:
 .. code-block:: yaml
 
     hubblestack:
-      nebula:
-        returner:
-          splunk:
-            token: <splunk_http_forwarder_token>
-            indexer: <hostname/IP of Splunk indexer>
-            sourcetype: <Destination sourcetype for data>
-            index: <Destination index for data>
+      returner:
+        splunk:
+          - token: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+            indexer: splunk-indexer.domain.tld
+            index: hubble
+            sourcetype_nebula: hubble_osquery
 
 You can also add an `custom_fields` argument which is a list of keys to add to events
 with using the results of config.get(<custom_field>). These new keys will be prefixed
@@ -30,13 +28,12 @@ be skipped:
 .. code-block:: yaml
 
     hubblestack:
-      nebula:
-        returner:
-          splunk:
-            token: <splunk_http_forwarder_token>
-            indexer: <hostname/IP of Splunk indexer>
-            sourcetype: <Destination sourcetype for data>
-            index: <Destination index for data>
+      returner:
+        splunk:
+          - token: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+            indexer: splunk-indexer.domain.tld
+            index: hubble
+            sourcetype_nebula: hubble_osquery
             custom_fields:
               - site
               - product_group
